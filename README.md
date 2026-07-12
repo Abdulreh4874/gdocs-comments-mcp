@@ -5,6 +5,7 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/stanislawherjan1/gdocs-comments-mcp/actions/workflows/ci.yml"><img src="https://github.com/stanislawherjan1/gdocs-comments-mcp/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="https://www.npmjs.com/package/gdocs-comments-mcp"><img src="https://img.shields.io/npm/v/gdocs-comments-mcp?color=cb3837&logo=npm" alt="npm version"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT license"></a>
   <img src="https://img.shields.io/badge/node-%E2%89%A518-brightgreen?logo=node.js" alt="node >= 18">
@@ -294,9 +295,11 @@ add_comment ─▶ attach browser ─▶ open doc (?hl=en) ─▶ Ctrl/Cmd+F fin
 
 ## Security
 
-- The profile directory contains your **Google session cookies** — treat it like a password. It's created with `0700` permissions; `logout` deletes it (and see [device activity](https://myaccount.google.com/device-activity) to revoke server-side).
-- Doc ids are strictly validated and navigation is pinned to `docs.google.com` — the tool can't be steered to other sites.
-- Tool output is structured-only (`{ ok, occurrence_used, verified }`); document content never flows back to the model.
+**What the AI agent (and the MCP client) can see.** Nothing sensitive. Sign-in happens in a real browser where you type your Google credentials directly to Google — the `login` step is a terminal CLI, *not* an MCP tool, so the model is never in that loop and never sees your password, 2FA, cookies, or OAuth tokens. During normal use the `add_comment` and `check_connection` tools return **structured status only** (`{ ok, anchored, occurrence_used, verified }` / `{ connected, mode }`) and **never any document content** — so a poisoned document can't smuggle instructions back into the model through this tool. The only things that reach the model's context are what the agent itself supplied (`doc`, `find_text`, `comment_text`) and, occasionally, a local file path inside an error message.
+
+**Where the sensitive material actually lives.** Your **Google session cookies** sit in the profile directory (`~/.gdocs-comments-mcp/profile`), created with `0700` permissions — treat that directory like a password. It stays on disk and is never returned to the model. `logout` deletes it; you can also revoke server-side via [Google device activity](https://myaccount.google.com/device-activity). The optional audit log stores **hashes only**, never content. The one residual risk is ordinary local-machine hygiene: any other process with read access to that directory could reuse the session — that's not an MCP data flow, just standard local security.
+
+**Containment.** Doc ids are strictly validated and navigation is hard-pinned to `docs.google.com` — the tool can't be steered to other sites.
 
 ## FAQ
 
