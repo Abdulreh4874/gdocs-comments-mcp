@@ -19,6 +19,8 @@
     &nbsp;·&nbsp;
     <a href="#configuration">Configuration</a>
     &nbsp;·&nbsp;
+    <a href="#what-this-does--and-what-it-doesnt">Scope</a>
+    &nbsp;·&nbsp;
     <a href="#how-it-works">How it works</a>
     &nbsp;·&nbsp;
     <a href="#troubleshooting">Troubleshooting</a>
@@ -38,6 +40,22 @@ This MCP server closes that gap. Your agent calls `add_comment` with a text frag
 <p align="center">
   <img src="https://raw.githubusercontent.com/stanislawherjan1/gdocs-comments-mcp/main/assets/demo.png" alt="A Google Doc with two inline comments posted by the agent, each anchored to a highlighted text fragment" width="900">
 </p>
+
+## What this does — and what it doesn't
+
+This server is deliberately **one narrow thing**. Read this before wiring it in.
+
+**✅ It does:** add comments to a Google Doc — anchored to a specific text range (the part no API can do), or unanchored on the whole document.
+
+**❌ It does NOT:**
+
+| You want to… | Use instead |
+|---|---|
+| **Read the document's content** (so an agent can decide what to comment on, or get the exact text to anchor to) | **Google Docs API** (`documents.get`) or a Docs-reading MCP |
+| Export the doc (text / markdown / PDF) | **Google Drive API** (`files.export`) |
+| List / reply to / resolve / delete comments | **Google Drive API** (`comments.*`) — faster, no browser |
+
+> **Important:** this tool **never returns document content** — its output is structured-only (`{ ok, anchored, occurrence_used, verified }`), by design, so a malicious doc can't inject instructions into your agent. That means the agent is writing *blind*: to review a doc intelligently, pair this with a **read** capability (Docs API `documents.get`) and feed the exact quoted text back in as `find_text`. The two use different auth — this server drives a logged-in browser session (no OAuth), while the Docs/Drive APIs need an OAuth token or service account — but they can run against the same Google account.
 
 ## Why not the official APIs?
 
