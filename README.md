@@ -45,8 +45,8 @@ This server does one thing: **add a comment to a Google Doc.** The interesting c
 
 | Add a comment… | Google Docs API | Google Drive API | this server |
 |---|:---:|:---:|:---:|
-| anchored to a text range | ❌ | ❌ | ✅ |
 | unanchored (whole document) | ❌ | ✅ | ✅ |
+| anchored to a text range | ❌ | ❌ | ✅ |
 
 The Docs API has no comment endpoints at all. The Drive API's `comments.create` accepts an `anchor` field, but the Docs editor **ignores** it — the comment renders as an unanchored, whole-document comment. The editor's own anchor format (`kix.*`) is undocumented and can't be produced externally ([Drive API docs](https://developers.google.com/workspace/drive/api/guides/manage-comments), [issuetracker #292610078](https://issuetracker.google.com/issues/292610078), open since 2016). Driving the editor UI is the only way — so this server does exactly that, and nothing else. (Listing, replying, resolving, and deleting comments already work over the Drive API — use a Drive-based tool for those.)
 
