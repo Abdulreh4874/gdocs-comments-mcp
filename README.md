@@ -25,10 +25,14 @@
   </sub>
 </p>
 
-Your agent asks for a comment on a specific phrase — this server posts it through a real, logged-in Google Docs session, so it lands **anchored to that exact text**, just as if a human had selected it and pressed `Ctrl+Alt+M`:
+You're building an AI process around Google Docs — an agent that reviews drafts, audits contracts, gives editorial feedback. The natural way to deliver that feedback is how humans do it: **a comment pinned to the exact sentence it's about**, not a wall of text dumped at the end of the doc or into chat.
+
+Then you hit the wall: **the Google APIs can't create anchored comments.** The Docs API has no comment endpoints at all, and the Drive API accepts an `anchor` field only to have the Docs editor ignore it — the comment shows up as a general, whole-document comment.
+
+This MCP server closes that gap. Your agent calls `add_comment` with a text fragment and a comment; the server posts it through a real, logged-in Google Docs session, so it lands anchored to that exact text — just as if a human had selected it and pressed `Ctrl+Alt+M`:
 
 ```
-you (or your agent)                    Google Docs
+your agent                             Google Docs
 ┌───────────────────┐    keyboard    ┌─────────────────────────────┐
 │ add_comment(      │   automation   │ "…the quarterly numbers…"   │
 │   doc, find_text, │ ─────────────▶ │        ▲                    │
@@ -37,9 +41,9 @@ you (or your agent)                    Google Docs
                                      └─────────────────────────────┘
 ```
 
-## Why this exists
+## Why not the official APIs?
 
-The official APIs cannot do this — a fact this project verified the hard way:
+Verified the hard way:
 
 | Operation | Docs API | Drive API | this server |
 |---|:---:|:---:|:---:|
