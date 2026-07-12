@@ -1,7 +1,7 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.stanislawherjan1/gdocs-comments-mcp",
-  "description": "Add inline, range-anchored comments to Google Docs — leave feedback, notes, or review comments pinned to specific passages. The one comment operation the Google Docs/Drive APIs cannot do; drives a real logged-in Docs session via Playwright. For AI agents that review or give feedback on documents.",
+  "description": "Add inline, range-anchored comments to Google Docs - the one comment op the Google APIs can't do.",
   "repository": {
     "url": "https://github.com/stanislawherjan1/gdocs-comments-mcp",
     "source": "github"
