@@ -6,6 +6,7 @@ Inline (range-anchored) Google Docs comments over MCP.
 
 Usage:
   gdocs-comments-mcp            Run the MCP server (stdio) — this is what MCP clients invoke
+  gdocs-comments-mcp setup      One-shot: sign in, then register the server with your MCP client
   gdocs-comments-mcp login      One-time interactive Google sign-in (opens a browser window)
   gdocs-comments-mcp status     Check whether the saved session is still valid
   gdocs-comments-mcp logout     Delete the saved browser profile / Google session
@@ -28,6 +29,11 @@ switch (cmd) {
   case 'serve':
     await import('./server.js');
     break;
+  case 'setup': {
+    const { setup } = await import('./commands.js');
+    await setup();
+    break;
+  }
   case 'login': {
     const { login } = await import('./commands.js');
     await login();

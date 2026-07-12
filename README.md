@@ -70,6 +70,17 @@ This server is deliberately **one narrow thing**. Read this before wiring it in.
 
 ## Quickstart
 
+**One command** — signs you in (opens a browser once), then registers the server with Claude Code:
+
+```bash
+npx -y gdocs-comments-mcp setup
+```
+
+That's it — skip to **Use it** below. Prefer to do it by hand, or use another client? The manual steps are below.
+
+<details>
+<summary><b>Manual setup</b></summary>
+
 **1. Log in once** — opens a browser window; the Google session is saved to a local profile (`~/.gdocs-comments-mcp/profile`):
 
 ```bash
@@ -82,6 +93,8 @@ npx -y gdocs-comments-mcp login
 # Claude Code
 claude mcp add gdocs-comments -- npx -y gdocs-comments-mcp
 ```
+
+**Other MCP clients** — after `login`, add the config for your client:
 
 <details>
 <summary><b>Claude Desktop / Cowork</b></summary>
@@ -152,6 +165,7 @@ Add to `.vscode/mcp.json`:
   }
 }
 ```
+</details>
 </details>
 
 **3. Use it** — ask your agent:
