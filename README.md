@@ -45,9 +45,13 @@ Verified the hard way:
 
 | Operation | Docs API | Drive API | this server |
 |---|:---:|:---:|:---:|
-| Comment on the whole document | ❌ <sub>no comment endpoints at all</sub> | ✅ | — <sub>(use the Drive API)</sub> |
-| List / reply / resolve / delete comments | ❌ | ✅ | — <sub>(use the Drive API)</sub> |
-| **Comment anchored to a text range** | ❌ | ⚠️ <sub>`anchor` is saved but the Docs UI **ignores it** — renders unanchored</sub> | ✅ |
+| Comment on the whole document | ❌ ¹ | ✅ | ❌ ³ |
+| List / reply / resolve / delete comments | ❌ ¹ | ✅ | ❌ ³ |
+| **Comment anchored to a text range** | ❌ | ❌ ² | ✅ |
+
+<sup>¹</sup> The Docs API has no comment endpoints at all.
+<sup>²</sup> The Drive API's `comments.create` accepts an `anchor` field, but the Docs editor **ignores** it — the comment renders as an unanchored, whole-document comment.
+<sup>³</sup> By design — these already work over the Drive API, which is faster and needs no browser. This server does the one thing that API can't.
 
 The Docs editor's own anchor format (`kix.*`) is undocumented and can't be produced externally ([Drive API docs](https://developers.google.com/workspace/drive/api/guides/manage-comments), [issuetracker #292610078](https://issuetracker.google.com/issues/292610078), open since 2016). Driving the editor UI is the only way — so this server does exactly that, and nothing else.
 

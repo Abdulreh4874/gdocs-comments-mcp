@@ -21,13 +21,19 @@ const TOOLS = [
   {
     name: 'add_comment',
     description:
-      'Add an inline comment anchored to a specific text fragment in a Google '
-      + 'Doc. Drives a real logged-in Docs session (browser UI) because the '
-      + 'Docs/Drive APIs cannot anchor comments to a text range. Use ONLY for '
-      + 'adding anchored comments — list/reply/resolve/delete work over the '
-      + 'Drive API and belong in Drive tools. Requires a one-time '
-      + '`npx gdocs-comments-mcp login` by the operator. Returns only '
-      + '{ ok, occurrence_used, verified } — never document content.',
+      'Add an inline comment anchored to a specific text fragment in a Google Doc '
+      + '(the comment is pinned to that exact phrase, like selecting text and '
+      + 'commenting on it by hand). '
+      + 'USE THIS WHEN the user wants to leave feedback, notes, questions, edits, '
+      + 'or review comments on specific passages of a Google Doc — e.g. "review '
+      + 'this doc and comment on the weak spots", "leave a comment on that '
+      + 'sentence", "add editorial feedback inline". This is the ONLY way to place '
+      + 'anchored comments: the Google Docs and Drive APIs cannot anchor a comment '
+      + 'to a text range, so this drives a real logged-in Docs session in a browser. '
+      + 'Do NOT use for list/reply/resolve/delete — those work over the Drive API. '
+      + 'Requires a one-time `npx gdocs-comments-mcp login` by the human operator '
+      + '(you cannot log in for them). Returns only { ok, occurrence_used, verified } '
+      + '— never document content.',
     inputSchema: {
       type: 'object',
       required: ['doc', 'find_text', 'comment_text'],
