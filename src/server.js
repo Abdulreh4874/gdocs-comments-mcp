@@ -32,11 +32,12 @@ const TOOLS = [
       + 'to a text range, so this drives a real logged-in Docs session in a browser. '
       + 'Do NOT use for list/reply/resolve/delete — those work over the Drive API. '
       + 'Requires a one-time `npx gdocs-comments-mcp login` by the human operator '
-      + '(you cannot log in for them). Returns only { ok, occurrence_used, verified } '
-      + '— never document content.',
+      + '(you cannot log in for them). Omit find_text to add a general, unanchored '
+      + 'comment on the document instead. Returns only '
+      + '{ ok, anchored, occurrence_used, verified } — never document content.',
     inputSchema: {
       type: 'object',
-      required: ['doc', 'find_text', 'comment_text'],
+      required: ['doc', 'comment_text'],
       properties: {
         doc: {
           type: 'string',
@@ -44,7 +45,7 @@ const TOOLS = [
         },
         find_text: {
           type: 'string',
-          description: 'Exact single-line text fragment to anchor the comment to. Must match the doc text exactly; pick a fragment unique enough to identify the spot (or pass occurrence).',
+          description: 'Exact single-line text fragment to anchor the comment to. Must match the doc text exactly; pick a fragment unique enough to identify the spot (or pass occurrence). Omit for a general, unanchored comment on the whole document.',
         },
         comment_text: {
           type: 'string',

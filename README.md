@@ -41,19 +41,14 @@ This MCP server closes that gap. Your agent calls `add_comment` with a text frag
 
 ## Why not the official APIs?
 
-Verified the hard way:
+This server does one thing: **add a comment to a Google Doc.** The interesting case is the anchored one — a comment pinned to a specific text range — which no Google API can do.
 
-| Operation | Docs API | Drive API | this server |
+| Add a comment… | Google Docs API | Google Drive API | this server |
 |---|:---:|:---:|:---:|
-| Comment on the whole document | ❌ ¹ | ✅ | ❌ ³ |
-| List / reply / resolve / delete comments | ❌ ¹ | ✅ | ❌ ³ |
-| **Comment anchored to a text range** | ❌ | ❌ ² | ✅ |
+| anchored to a text range | ❌ | ❌ | ✅ |
+| unanchored (whole document) | ❌ | ✅ | ✅ |
 
-<sup>¹</sup> The Docs API has no comment endpoints at all.
-<sup>²</sup> The Drive API's `comments.create` accepts an `anchor` field, but the Docs editor **ignores** it — the comment renders as an unanchored, whole-document comment.
-<sup>³</sup> By design — these already work over the Drive API, which is faster and needs no browser. This server does the one thing that API can't.
-
-The Docs editor's own anchor format (`kix.*`) is undocumented and can't be produced externally ([Drive API docs](https://developers.google.com/workspace/drive/api/guides/manage-comments), [issuetracker #292610078](https://issuetracker.google.com/issues/292610078), open since 2016). Driving the editor UI is the only way — so this server does exactly that, and nothing else.
+The Docs API has no comment endpoints at all. The Drive API's `comments.create` accepts an `anchor` field, but the Docs editor **ignores** it — the comment renders as an unanchored, whole-document comment. The editor's own anchor format (`kix.*`) is undocumented and can't be produced externally ([Drive API docs](https://developers.google.com/workspace/drive/api/guides/manage-comments), [issuetracker #292610078](https://issuetracker.google.com/issues/292610078), open since 2016). Driving the editor UI is the only way — so this server does exactly that, and nothing else. (Listing, replying, resolving, and deleting comments already work over the Drive API — use a Drive-based tool for those.)
 
 ## Quickstart
 
@@ -148,7 +143,7 @@ Add to `.vscode/mcp.json`:
 The agent calls `add_comment` and gets back:
 
 ```json
-{ "ok": true, "occurrence_used": 1, "verified": true }
+{ "ok": true, "anchored": true, "occurrence_used": 1, "verified": true }
 ```
 
 …and the comment is sitting on the highlighted phrase in the doc, from the account you logged in with.
@@ -162,11 +157,11 @@ No Playwright browser download is needed — by default the server drives your i
 | Param | Required | Description |
 |---|:---:|---|
 | `doc` | ✅ | Document id **or** full `docs.google.com/document/d/<id>/edit` URL |
-| `find_text` | ✅ | Exact, single-line text fragment to anchor to (must match the doc text) |
 | `comment_text` | ✅ | Comment body (plain text, newlines OK) |
+| `find_text` | — | Exact, single-line text fragment to anchor to (must match the doc text). **Omit to add a general, unanchored comment on the whole document.** |
 | `occurrence` | — | Anchor to the N-th match when `find_text` appears multiple times (default 1) |
 
-Returns `{ ok, occurrence_used, verified }` — `verified: true` means the posted comment was observed in the page after submitting. If `find_text` isn't found, the call fails with `TEXT_NOT_FOUND` and **nothing is posted**.
+Returns `{ ok, anchored, occurrence_used, verified }` — `verified: true` means the posted comment was observed in the page after submitting. If `find_text` is given but not found, the call fails with `TEXT_NOT_FOUND` and **nothing is posted**.
 
 The tool **never returns document content**, so a malicious doc can't inject instructions into your agent through it.
 
@@ -245,7 +240,9 @@ Ctrl/Cmd+Alt+M  →  type comment_text  →  Ctrl/Cmd+Enter (submit)
 
 `Ctrl/Cmd+Alt+M` is the Docs shortcut for "insert comment on the current selection" — which is precisely the anchored comment the APIs won't create. Keyboard shortcuts are chosen per-platform (`Cmd` on macOS, `Ctrl` elsewhere).
 
-**5. Verify and report.** After submitting, the server waits for the comment text to appear in the page and returns `{ ok, occurrence_used, verified }`. `verified: true` means the posted comment was actually observed; it never returns any document content, so a poisoned document can't smuggle instructions back into your agent. Concurrent calls are serialized behind a mutex, because two keyboard flows in the same window would interleave and corrupt each other.
+(If `find_text` is omitted, steps 3–4 collapse to "put the cursor at the document start and comment there" — a general, unanchored comment.)
+
+**5. Verify and report.** After submitting, the server waits for the comment text to appear in the page and returns `{ ok, anchored, occurrence_used, verified }`. `verified: true` means the posted comment was actually observed; it never returns any document content, so a poisoned document can't smuggle instructions back into your agent. Concurrent calls are serialized behind a mutex, because two keyboard flows in the same window would interleave and corrupt each other.
 
 ```
 add_comment ─▶ attach browser ─▶ open doc (?hl=en) ─▶ Ctrl/Cmd+F find_text

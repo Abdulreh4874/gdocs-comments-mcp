@@ -68,10 +68,8 @@ async function readFindCounter(page) {
  * Returns { ok, occurrence_used, verified } and never any document content.
  */
 export async function addComment(context, { docId, findText, commentText, occurrence }) {
-  if (typeof findText !== 'string' || !findText.trim()) {
-    throw new CommentError('find_text is required', 'BAD_INPUT');
-  }
-  if (/[\r\n]/.test(findText)) {
+  const anchored = typeof findText === 'string' && findText.trim() !== '';
+  if (anchored && /[\r\n]/.test(findText)) {
     throw new CommentError(
       'find_text must be a single-line fragment (the find bar is one line); anchor to a shorter piece of the passage',
       'BAD_INPUT',
@@ -109,32 +107,39 @@ export async function addComment(context, { docId, findText, commentText, occurr
     await page.waitForSelector('#docs-editor, .kix-appview-editor', { timeout: 25000 });
     await page.waitForTimeout(3000);
 
-    // Find the anchor text and land on the requested occurrence.
-    await page.keyboard.press(`${MOD}+f`);
-    await page.waitForTimeout(700);
-    await page.keyboard.type(findText, { delay: 8 });
-    await page.waitForTimeout(600);
+    if (anchored) {
+      // Find the anchor text and land on the requested occurrence.
+      await page.keyboard.press(`${MOD}+f`);
+      await page.waitForTimeout(700);
+      await page.keyboard.type(findText, { delay: 8 });
+      await page.waitForTimeout(600);
 
-    const counter = await readFindCounter(page);
-    if (counter && counter.total === 0) {
-      throw new CommentError(
-        'find_text was not found in the document — nothing was commented. Check the fragment (it must match the doc text exactly).',
-        'TEXT_NOT_FOUND',
-      );
-    }
-    if (counter && occ > counter.total) {
-      throw new CommentError(
-        `occurrence ${occ} requested but only ${counter.total} match(es) exist — nothing was commented.`,
-        'TEXT_NOT_FOUND',
-      );
-    }
+      const counter = await readFindCounter(page);
+      if (counter && counter.total === 0) {
+        throw new CommentError(
+          'find_text was not found in the document — nothing was commented. Check the fragment (it must match the doc text exactly).',
+          'TEXT_NOT_FOUND',
+        );
+      }
+      if (counter && occ > counter.total) {
+        throw new CommentError(
+          `occurrence ${occ} requested but only ${counter.total} match(es) exist — nothing was commented.`,
+          'TEXT_NOT_FOUND',
+        );
+      }
 
-    for (let i = 0; i < occ; i++) {
-      await page.keyboard.press('Enter');
-      await page.waitForTimeout(250);
+      for (let i = 0; i < occ; i++) {
+        await page.keyboard.press('Enter');
+        await page.waitForTimeout(250);
+      }
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(400);
+    } else {
+      // Unanchored: place the cursor at the document start and comment there,
+      // so the comment isn't tied to a highlighted range.
+      await page.keyboard.press(`${MOD}+Home`);
+      await page.waitForTimeout(300);
     }
-    await page.keyboard.press('Escape');
-    await page.waitForTimeout(400);
 
     // Open the comment box on the found selection, type, submit.
     await page.keyboard.press(`${MOD}+Alt+m`);
@@ -164,11 +169,12 @@ export async function addComment(context, { docId, findText, commentText, occurr
     audit({
       event: 'add_comment.ok',
       doc_hash: docHash,
-      occurrence_used: occ,
-      find_text_hash: shortHash([findText]),
+      anchored,
+      occurrence_used: anchored ? occ : null,
+      find_text_hash: anchored ? shortHash([findText]) : null,
       verified,
     });
-    return { ok: true, occurrence_used: occ, verified };
+    return { ok: true, anchored, occurrence_used: anchored ? occ : null, verified };
   } catch (err) {
     audit({ event: 'add_comment.fail', doc_hash: docHash, reason: err.code || err.message?.slice(0, 200) || 'unknown' });
     throw err;
