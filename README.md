@@ -31,15 +31,9 @@ Then you hit the wall: **the Google APIs can't create anchored comments.** The D
 
 This MCP server closes that gap. Your agent calls `add_comment` with a text fragment and a comment; the server posts it through a real, logged-in Google Docs session, so it lands anchored to that exact text — just as if a human had selected it and pressed `Ctrl+Alt+M`:
 
-```
-your agent                             Google Docs
-┌───────────────────┐    keyboard    ┌─────────────────────────────┐
-│ add_comment(      │   automation   │ "…the quarterly numbers…"   │
-│   doc, find_text, │ ─────────────▶ │        ▲                    │
-│   comment_text)   │                │        └─ 💬 "Update this   │
-└───────────────────┘                │            before Friday"  │
-                                     └─────────────────────────────┘
-```
+<p align="center">
+  <img src="https://raw.githubusercontent.com/stanislawherjan1/gdocs-comments-mcp/main/assets/demo.png" alt="A Google Doc with two inline comments posted by the agent, each anchored to a highlighted text fragment" width="900">
+</p>
 
 ## Why not the official APIs?
 
