@@ -21,13 +21,22 @@
   "keywords": [
     "mcp",
     "modelcontextprotocol",
+    "model-context-protocol",
     "mcp-server",
     "google-docs",
+    "gdocs",
+    "google-workspace",
+    "google-drive",
     "comments",
     "anchored-comments",
     "inline-comments",
+    "document-review",
+    "ai-agent",
     "claude",
-    "playwright"
+    "cursor",
+    "copilot",
+    "playwright",
+    "browser-automation"
   ],
   "repository": {
     "type": "git",
