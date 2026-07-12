@@ -1,0 +1,46 @@
+{
+  "name": "gdocs-comments-mcp",
+  "version": "0.1.0",
+  "description": "MCP server that adds range-anchored (inline) comments to Google Docs — the one comment operation the Google Docs/Drive APIs cannot do — by driving a real logged-in Docs session with Playwright.",
+  "type": "module",
+  "bin": {
+    "gdocs-comments-mcp": "src/cli.js"
+  },
+  "files": [
+    "src",
+    "server.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node src/cli.js"
+  },
+  "keywords": [
+    "mcp",
+    "modelcontextprotocol",
+    "mcp-server",
+    "google-docs",
+    "comments",
+    "anchored-comments",
+    "inline-comments",
+    "claude",
+    "playwright"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stanislawherjan1/gdocs-comments-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/stanislawherjan1/gdocs-comments-mcp/issues"
+  },
+  "homepage": "https://github.com/stanislawherjan1/gdocs-comments-mcp#readme",
+  "author": "Stanisław Herjan <stanislaw@herjan.co>",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "playwright-core": "^1.48.0"
+  }
+}
