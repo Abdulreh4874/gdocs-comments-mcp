@@ -1,6 +1,7 @@
 {
   "name": "gdocs-comments-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "mcpName": "io.github.stanislawherjan1/gdocs-comments-mcp",
   "description": "MCP server that adds range-anchored (inline) comments to Google Docs — the one comment operation the Google Docs/Drive APIs cannot do — by driving a real logged-in Docs session with Playwright.",
   "type": "module",
   "bin": {

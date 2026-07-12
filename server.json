@@ -1,31 +1,30 @@
 {
-  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.stanislawherjan1/gdocs-comments-mcp",
   "description": "Add inline, range-anchored comments to Google Docs — leave feedback, notes, or review comments pinned to specific passages. The one comment operation the Google Docs/Drive APIs cannot do; drives a real logged-in Docs session via Playwright. For AI agents that review or give feedback on documents.",
   "repository": {
     "url": "https://github.com/stanislawherjan1/gdocs-comments-mcp",
     "source": "github"
   },
-  "version": "0.1.0",
+  "version": "0.1.1",
   "packages": [
     {
-      "registry_type": "npm",
-      "registry_base_url": "https://registry.npmjs.org",
+      "registryType": "npm",
       "identifier": "gdocs-comments-mcp",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "transport": {
         "type": "stdio"
       },
-      "environment_variables": [
+      "environmentVariables": [
         {
           "name": "GDOCS_COMMENTS_PROFILE_DIR",
           "description": "Browser profile location (default ~/.gdocs-comments-mcp/profile)",
-          "is_required": false
+          "isRequired": false
         },
         {
           "name": "GDOCS_COMMENTS_CDP_URL",
           "description": "Attach to an existing browser over CDP instead of managing a profile",
-          "is_required": false
+          "isRequired": false
         }
       ]
     }

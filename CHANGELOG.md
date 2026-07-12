@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1 — 2026-07-12
+
+- Add `mcpName` to package.json and align `server.json` to the current registry
+  schema, for listing in the official MCP Registry.
+
 ## 0.1.0 — 2026-07-12
 
 Initial public release, extracted from an internal integration.
