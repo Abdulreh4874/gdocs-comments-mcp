@@ -15,11 +15,11 @@
   <sub>
     <a href="#quickstart">Quickstart</a>
     &nbsp;·&nbsp;
+    <a href="#what-this-does--and-what-it-doesnt">Scope</a>
+    &nbsp;·&nbsp;
     <a href="#tools">Tools</a>
     &nbsp;·&nbsp;
     <a href="#configuration">Configuration</a>
-    &nbsp;·&nbsp;
-    <a href="#what-this-does--and-what-it-doesnt">Scope</a>
     &nbsp;·&nbsp;
     <a href="#how-it-works">How it works</a>
     &nbsp;·&nbsp;
@@ -41,6 +41,17 @@ This MCP server closes that gap. Your agent calls `add_comment` with a text frag
   <img src="https://raw.githubusercontent.com/stanislawherjan1/gdocs-comments-mcp/main/assets/demo.png" alt="A Google Doc with two inline comments posted by the agent, each anchored to a highlighted text fragment" width="900">
 </p>
 
+## Why not the official APIs?
+
+This server does one thing: **add a comment to a Google Doc.** The interesting case is the anchored one — a comment pinned to a specific text range — which no Google API can do.
+
+| Add a comment… | Google Docs API | Google Drive API | this server |
+|---|:---:|:---:|:---:|
+| unanchored (whole document) | ❌ | ✅ | ✅ |
+| anchored to a text range | ❌ | ❌ | ✅ |
+
+The Docs API has no comment endpoints at all. The Drive API's `comments.create` accepts an `anchor` field, but the Docs editor **ignores** it — the comment renders as an unanchored, whole-document comment. The editor's own anchor format (`kix.*`) is undocumented and can't be produced externally ([Drive API docs](https://developers.google.com/workspace/drive/api/guides/manage-comments), [issuetracker #292610078](https://issuetracker.google.com/issues/292610078), open since 2016). Driving the editor UI is the only way — so this server does exactly that, and nothing else. (Listing, replying, resolving, and deleting comments already work over the Drive API — use a Drive-based tool for those.)
+
 ## What this does — and what it doesn't
 
 This server is deliberately **one narrow thing**. Read this before wiring it in.
@@ -56,17 +67,6 @@ This server is deliberately **one narrow thing**. Read this before wiring it in.
 | List / reply to / resolve / delete comments | **Google Drive API** (`comments.*`) — faster, no browser |
 
 > **Important:** this tool **never returns document content** — its output is structured-only (`{ ok, anchored, occurrence_used, verified }`), by design, so a malicious doc can't inject instructions into your agent. That means the agent is writing *blind*: to review a doc intelligently, pair this with a **read** capability (Docs API `documents.get`) and feed the exact quoted text back in as `find_text`. The two use different auth — this server drives a logged-in browser session (no OAuth), while the Docs/Drive APIs need an OAuth token or service account — but they can run against the same Google account.
-
-## Why not the official APIs?
-
-This server does one thing: **add a comment to a Google Doc.** The interesting case is the anchored one — a comment pinned to a specific text range — which no Google API can do.
-
-| Add a comment… | Google Docs API | Google Drive API | this server |
-|---|:---:|:---:|:---:|
-| unanchored (whole document) | ❌ | ✅ | ✅ |
-| anchored to a text range | ❌ | ❌ | ✅ |
-
-The Docs API has no comment endpoints at all. The Drive API's `comments.create` accepts an `anchor` field, but the Docs editor **ignores** it — the comment renders as an unanchored, whole-document comment. The editor's own anchor format (`kix.*`) is undocumented and can't be produced externally ([Drive API docs](https://developers.google.com/workspace/drive/api/guides/manage-comments), [issuetracker #292610078](https://issuetracker.google.com/issues/292610078), open since 2016). Driving the editor UI is the only way — so this server does exactly that, and nothing else. (Listing, replying, resolving, and deleting comments already work over the Drive API — use a Drive-based tool for those.)
 
 ## Quickstart
 
